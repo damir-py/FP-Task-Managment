@@ -1,5 +1,6 @@
 from django.db import models
 from abstraction.base_model import BaseModel
+from django.contrib.auth.hashers import make_password
 
 USER_ROLE = (
     (1, 'Manager'),
@@ -33,7 +34,21 @@ class User(BaseModel):
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
     tasks = models.ManyToManyField(Task)
 
+    def save(
+            self,
+            *args,
+            force_insert=False,
+            force_update=False,
+            using=None,
+            update_fields=None,
+    ):
+        if self.password and not self.created_at:
+            self.password = make_password(self.password)
 
+        super(User, self).save(
+            *args, force_insert=force_insert, force_update=force_update, using=using,
+            update_fields=update_fields
+        )
 
     def __str__(self):
         return self.username
