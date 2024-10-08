@@ -5,7 +5,7 @@ from .models import Team, Task, User
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'username', 'phone_number', 'role', 'team')
+    list_display = ('id', 'username', 'phone_number', 'role', 'team', 'created_at')
     list_display_links = ('id', 'username', 'phone_number')
     list_filter = ('team', 'role')
 
