@@ -1,6 +1,6 @@
 from django.db import models
+
 from abstraction.base_model import BaseModel
-from django.contrib.auth.hashers import make_password
 
 USER_ROLE = (
     (1, 'Manager'),
@@ -21,12 +21,18 @@ class Task(BaseModel):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     description = models.TextField(max_length=200)
 
-    message = models.TextField(max_length=200)
-
     deadline = models.DateTimeField()
 
     def __str__(self):
         return self.title
+
+
+class Comment(BaseModel):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    text = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.task.title
 
 
 class User(BaseModel):

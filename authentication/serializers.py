@@ -2,13 +2,13 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 
 from exceptions.CustomException import CustomException
-from .models import User
+from .models import User, Team
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'phone_number', 'password', 'role')
+        fields = ('username', 'phone_number', 'password', 'role', 'team', 'tasks')
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -34,3 +34,12 @@ class UserLoginSerializer(serializers.Serializer):
 class TokenSerializer(serializers.Serializer):
     access_token = serializers.CharField()
     refresh_token = serializers.CharField()
+
+
+class TeamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Team
+        fields = ['id', 'name', 'created_at', 'updated_at']  # Adjust the fields based on your Team model
+        extra_kwargs = {
+            'name': {'required': True}
+        }
