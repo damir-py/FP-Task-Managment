@@ -57,7 +57,7 @@ MIDDLEWARE = [
 
     # Authentication Middlewares
     'authentication.middlewares.CreateRoleBasedRedirectMiddleware',
-    'authentication.middlewares.CreateTeamBasedRedirectMiddleware',
+    # 'authentication.middlewares.CreateTeamBasedRedirectMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'

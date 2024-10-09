@@ -5,8 +5,9 @@ from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from exceptions.CustomException import CustomException
-from .models import User, Team
-from .serializers import UserSerializer, UserLoginSerializer, TokenSerializer, TeamSerializer
+from .models import User, Team, Task, Comment
+from .serializers import UserSerializer, UserLoginSerializer, TokenSerializer, TeamSerializer, TaskSerializer, \
+    TasksAddingSerializer
 from .utils import user_checking
 
 
@@ -33,6 +34,27 @@ class Authentication(ViewSet):
 
         serializer_data.save()
         return Response(data={'message': serializer_data.data, 'ok': True})
+
+    @swagger_auto_schema(
+        operation_summary='Adding Tasks',
+        operation_description='Adding Tasks',
+        request_body=TasksAddingSerializer,
+        responses={200: UserSerializer()},
+        tags=['Adding tasks']
+    )
+    def add_tasks(self, request):
+        user = request.data.get('user_id')
+        tasks_id = request.data.get('ids')
+        user_obj = User.objects.filter(id=user).first()
+
+        if not tasks_id:
+            raise CustomException('Tasks IDs are required!')
+        tasks = Task.objects.filter(id__in=tasks_id, team__id=user_obj.team.id)
+        if not tasks.exists():
+            raise CustomException('Not valid tasks!')
+
+        user_obj.tasks.add(*tasks)
+        return Response(data={'message': UserSerializer(user_obj).data, 'ok': True})
 
 
 class LoginView(ViewSet):
@@ -78,8 +100,7 @@ class TeamAndTaskAPIView(ViewSet):
         operation_description='Create Team',
         request_body=TeamSerializer,
         responses={200: TeamSerializer()},
-        tags=['Team']
-
+        tags=['Team and Task']
     )
     def team_create(self, request):
         team = Team.objects.filter(name=request.data.get('name')).first()
@@ -91,5 +112,21 @@ class TeamAndTaskAPIView(ViewSet):
         serializer.save()
         return Response(data={'message': serializer.data, 'ok': True})
 
-    # def task_create(self, request):
+    @swagger_auto_schema(
+        operation_summary='Create Team',
+        operation_description='Create Team',
+        request_body=TaskSerializer,
+        responses={200: TaskSerializer()},
+        tags=['Team and Task']
+    )
+    def task_create(self, request):
+        task = Task.objects.filter(title=request.data.get('title')).first()
+        if task:
+            raise CustomException('Title already exists!')
+        serializer = TaskSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(data={'message': serializer.errors, 'ok': False}, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(data={'message': serializer.data, 'ok': True})
+
 

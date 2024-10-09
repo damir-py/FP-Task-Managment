@@ -21,7 +21,7 @@ class Task(BaseModel):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     description = models.TextField(max_length=200)
 
-    deadline = models.DateTimeField()
+    deadline = models.DateField()
 
     def __str__(self):
         return self.title
