@@ -54,6 +54,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # Authentication Middlewares
+    'authentication.middlewares.CreateRoleBasedRedirectMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -91,7 +94,7 @@ DATABASES = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'authentication.custom_JWT.CustomJWTAuthentication',
     ),
 }
 
@@ -141,3 +144,22 @@ MEDIA_URL = '/media/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'jwt': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    'SWAGGER_UI_REQUEST_HEADERS': [
+        {
+            'name': 'Authorization',
+            'description': 'JWT Token',
+            'value': 'Bearer <your_jwt_token_here>'
+        },
+    ],
+    'LOGIN_URL': 'api/v1/auth/login',
+    "DEFAULT_MODEL_RENDERING": "example"
+}

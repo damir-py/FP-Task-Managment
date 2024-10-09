@@ -11,7 +11,7 @@ from .serializers import UserSerializer, UserLoginSerializer, TokenSerializer
 from .utils import user_checking
 
 
-class Authentication(ViewSet):
+class  Authentication(ViewSet):
     @swagger_auto_schema(
         operation_summary='Create User',
         operation_description='Create User',
@@ -21,8 +21,10 @@ class Authentication(ViewSet):
         tags=['Authentication']
     )
     def create_user(self, request):
+        print('ok')
         data = request.data
         user = User.objects.filter(username=data.get('username').lower()).first()
+        print("+" * 50)
         if user:
             return Response(data={'message': 'User already exists!', 'ok': False}, status=status.HTTP_400_BAD_REQUEST)
 

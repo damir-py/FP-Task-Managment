@@ -8,7 +8,7 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'phone_number', 'password')
+        fields = ('username', 'phone_number', 'password', 'role')
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -16,14 +16,14 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data['password'])
         return super().create(validated_data)
-    #
-    # def update(self, instance, validated_data):
-    #     if 'password' in validated_data:
-    #         validated_data['password'] = make_password(validated_data['password'])
-    #     if 'username' in validated_data and User.objects.filter(username=validated_data['username']).exclude(
-    #             id=instance.id).exists():
-    #         raise CustomException('Username already exists.')
-    #     return super().update(instance, validated_data)
+
+    def update(self, instance, validated_data):
+        if 'password' in validated_data:
+            validated_data['password'] = make_password(validated_data['password'])
+        if 'username' in validated_data and User.objects.filter(username=validated_data['username']).exclude(
+                id=instance.id).exists():
+            raise CustomException('Username already exists.')
+        return super().update(instance, validated_data)
 
 
 class UserLoginSerializer(serializers.Serializer):
