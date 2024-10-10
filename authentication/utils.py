@@ -18,5 +18,6 @@ def user_checking(data):
 def identify_role(token):
     if token:
         token = token.split()[1]
+
         payload = UntypedToken(token)
         return payload.get('role', '')

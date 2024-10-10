@@ -5,9 +5,9 @@ from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from exceptions.CustomException import CustomException
-from .models import User, Team, Task, Comment
+from .models import User, Team, Task
 from .serializers import UserSerializer, UserLoginSerializer, TokenSerializer, TeamSerializer, TaskSerializer, \
-    TasksAddingSerializer
+    TasksAddingSerializer, TeamAddingSerializer
 from .utils import user_checking
 
 
@@ -21,10 +21,9 @@ class Authentication(ViewSet):
         tags=['Authentication']
     )
     def create_user(self, request):
-        print('ok')
         data = request.data
-        user = User.objects.filter(username=data.get('username').lower()).first()
-        if user:
+        user = User.objects.filter(username=data.get('username')).first()
+        if user and user.phone_number == data.get('phone_number'):
             return Response(data={'message': 'User already exists!', 'ok': False}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer_data = UserSerializer(user, data=data, partial=True) if user else UserSerializer(data=data)
@@ -34,27 +33,6 @@ class Authentication(ViewSet):
 
         serializer_data.save()
         return Response(data={'message': serializer_data.data, 'ok': True})
-
-    @swagger_auto_schema(
-        operation_summary='Adding Tasks',
-        operation_description='Adding Tasks',
-        request_body=TasksAddingSerializer,
-        responses={200: UserSerializer()},
-        tags=['Adding tasks']
-    )
-    def add_tasks(self, request):
-        user = request.data.get('user_id')
-        tasks_id = request.data.get('ids')
-        user_obj = User.objects.filter(id=user).first()
-
-        if not tasks_id:
-            raise CustomException('Tasks IDs are required!')
-        tasks = Task.objects.filter(id__in=tasks_id, team__id=user_obj.team.id)
-        if not tasks.exists():
-            raise CustomException('Not valid tasks!')
-
-        user_obj.tasks.add(*tasks)
-        return Response(data={'message': UserSerializer(user_obj).data, 'ok': True})
 
 
 class LoginView(ViewSet):
@@ -82,7 +60,7 @@ class LoginView(ViewSet):
     @swagger_auto_schema(
         operation_summary='Information about User',
         operation_description='Information about User',
-        request_body=UserSerializer,
+        request_body=UserLoginSerializer,
         responses={200: UserSerializer()},
         tags=['Authentication']
 
@@ -129,4 +107,48 @@ class TeamAndTaskAPIView(ViewSet):
         serializer.save()
         return Response(data={'message': serializer.data, 'ok': True})
 
+    @swagger_auto_schema(
+        operation_summary='Adding Tasks',
+        operation_description='Adding Tasks',
+        request_body=TasksAddingSerializer,
+        responses={200: UserSerializer()},
+        tags=['Adding']
+    )
+    def add_tasks(self, request):
+        users_id = request.data.get('users_id')
+        task_id = request.data.get('task_id')
+        users = User.objects.filter(id__in=users_id)
 
+        if not task_id or not users_id:
+            raise CustomException('IDs are incorrect or not given!')
+        task_obj = Task.objects.filter(id=task_id, team__user__in=users_id).first()
+        if not task_obj:
+            raise CustomException('Not valid tasks!')
+
+        task_obj.user.add(*users)
+        return Response(data={'message': TaskSerializer(task_obj).data, 'ok': True})
+
+    @swagger_auto_schema(
+        operation_summary='Adding Tasks',
+        operation_description='Adding Tasks',
+        request_body=TeamAddingSerializer,
+        responses={200: UserSerializer()},
+        tags=['Adding']
+    )
+    def add_team(self, request):
+        user_id = request.data.get('users_id')
+        team_id = request.data.get('team_id')
+
+        if not team_id or not user_id:
+            raise CustomException('IDs are incorrect or not given!')
+
+        team_obj = Team.objects.filter(id=team_id).first()
+        if not team_obj:
+            raise CustomException('Not valid team!')
+        user_obj = User.objects.filter(id=user_id).first()
+        if not user_obj:
+            raise CustomException('User not found!')
+        team_obj.user = user_obj
+        team_obj.save()
+
+        return Response(data={'message': TeamSerializer(team_obj).data, 'ok': True})

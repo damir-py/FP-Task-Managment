@@ -8,7 +8,7 @@ from .models import User, Team, Task
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'phone_number', 'password', 'role', 'team', 'tasks')
+        fields = ('username', 'phone_number', 'password', 'role')
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -39,7 +39,7 @@ class TokenSerializer(serializers.Serializer):
 class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
-        fields = ('id', 'name', 'created_at', 'updated_at')  # Adjust the fields based on your Team model
+        fields = ('id', 'name', 'created_at', 'updated_at')
         extra_kwargs = {
             'name': {'required': True}
         }
@@ -48,12 +48,17 @@ class TeamSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ('id', 'title', 'team', 'description', 'deadline', 'created_at')
+        fields = ('id', 'title', 'team', 'user', 'description', 'deadline', 'created_at')
         extra_kwargs = {
             'team': {'required': True}
         }
 
 
 class TasksAddingSerializer(serializers.Serializer):
-    ids = serializers.ListField(child=serializers.IntegerField())
-    user_id = serializers.IntegerField()
+    task_id = serializers.IntegerField()
+    users_id = serializers.ListField(child=serializers.IntegerField())
+
+
+class TeamAddingSerializer(serializers.Serializer):
+    team_id = serializers.IntegerField()
+    users_id = serializers.IntegerField()
