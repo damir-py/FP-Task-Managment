@@ -26,8 +26,8 @@ class TeamAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'text', 'created_at')
-    list_display_links = ('id', 'text')
+    list_display = ('id', 'user', 'text', 'created_at')
+    list_display_links = ('id', 'text', 'user')
     list_filter = ('created_at',)
 
 

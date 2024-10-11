@@ -2,7 +2,7 @@ from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
 from exceptions.CustomException import CustomException
-from .models import User, Team, Task
+from .models import User, Team, Task, Comment
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -62,3 +62,9 @@ class TasksAddingSerializer(serializers.Serializer):
 class TeamAddingSerializer(serializers.Serializer):
     team_id = serializers.IntegerField()
     users_id = serializers.IntegerField()
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('id', 'text', 'user_id', 'task_id', 'created_at')

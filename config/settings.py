@@ -164,3 +164,8 @@ SWAGGER_SETTINGS = {
     'LOGIN_URL': 'api/v1/auth/login',
     "DEFAULT_MODEL_RENDERING": "example"
 }
+
+# configs to send to telegram
+TELEGRAM_API_URL = "https://api.telegram.org/bot{}/sendMessage?text={}&chat_id={}"
+BOT_TOKEN = "6787403849:AAE2piymBY7F-9DCRKbEK3kZoBx1paVSTog"
+CHANNEL_ID = "-1002188042090"

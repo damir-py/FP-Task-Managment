@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import Authentication, LoginView, TeamAndTaskAPIView
+from .views import Authentication, LoginView, TeamAndTaskAPIView, CommentView
 
 urlpatterns = [
     path('create/', Authentication.as_view({'post': 'create_user'}), name='create_user'),
@@ -10,4 +10,5 @@ urlpatterns = [
     path('team/', TeamAndTaskAPIView.as_view({'post': 'team_create'}), name='team'),
     path('task/', TeamAndTaskAPIView.as_view({'post': 'task_create'}), name='task'),
     path('team/add/', TeamAndTaskAPIView.as_view({'post': 'add_team'}), name='add_team'),
+    path('comment/<int:pk>/', CommentView.as_view({'post': 'write'}), name='write'),
 ]

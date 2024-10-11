@@ -5,9 +5,9 @@ from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from exceptions.CustomException import CustomException
-from .models import User, Team, Task
+from .models import User, Team, Task, Comment
 from .serializers import UserSerializer, UserLoginSerializer, TokenSerializer, TeamSerializer, TaskSerializer, \
-    TasksAddingSerializer, TeamAddingSerializer
+    TasksAddingSerializer, TeamAddingSerializer, CommentSerializer
 from .utils import user_checking
 
 
@@ -152,3 +152,27 @@ class TeamAndTaskAPIView(ViewSet):
         team_obj.save()
 
         return Response(data={'message': TeamSerializer(team_obj).data, 'ok': True})
+
+
+class CommentView(ViewSet):
+
+    @swagger_auto_schema(
+        operation_summary='Create comment to task',
+        operation_description='Create comment to task',
+        request_body=CommentSerializer(),
+        responses={200: CommentSerializer()},
+        tags=['comment']
+    )
+    def write(self, request, pk):
+        print(request.data)
+        user = User.objects.filter(id=request.user.id, task=pk).first()
+        if not user:
+            raise CustomException('User_id or Task_id not given correctly!')
+
+        message = Comment.objects.create(task_id=pk, user_id=request.user.id, text=request.data.get('text'))
+        message.save()
+        serializer = CommentSerializer(message)
+
+        return Response(data={'message': serializer.data, 'ok': True})
+
+
