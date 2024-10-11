@@ -1,5 +1,6 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -8,7 +9,7 @@ from exceptions.CustomException import CustomException
 from .models import User, Team, Task, Comment
 from .serializers import UserSerializer, UserLoginSerializer, TokenSerializer, TeamSerializer, TaskSerializer, \
     TasksAddingSerializer, TeamAddingSerializer, CommentSerializer
-from .utils import user_checking
+from .utils import user_checking, create_background_task
 
 
 class Authentication(ViewSet):
@@ -154,7 +155,7 @@ class TeamAndTaskAPIView(ViewSet):
         return Response(data={'message': TeamSerializer(team_obj).data, 'ok': True})
 
 
-class CommentView(ViewSet):
+class CommentAPIView(ViewSet):
 
     @swagger_auto_schema(
         operation_summary='Create comment to task',
@@ -164,7 +165,6 @@ class CommentView(ViewSet):
         tags=['comment']
     )
     def write(self, request, pk):
-        print(request.data)
         user = User.objects.filter(id=request.user.id, task=pk).first()
         if not user:
             raise CustomException('User_id or Task_id not given correctly!')
@@ -176,3 +176,15 @@ class CommentView(ViewSet):
         return Response(data={'message': serializer.data, 'ok': True})
 
 
+@api_view(['GET'])
+def start_scheduler(request):
+    from django.conf import settings
+    if settings.SCHEDULER == 0:
+        scheduler = create_background_task()
+        scheduler.start()
+        data = []
+        for schedule in scheduler.get_jobs():
+            data.append(schedule.next_run_time)
+            settings.SCHEDULER = 1
+        return Response(data={'result': data, 'ok': True}, status=status.HTTP_200_OK)
+    raise CustomException('Scheduler already running!')

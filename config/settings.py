@@ -23,6 +23,7 @@ SECRET_KEY = 'django-insecure-ae*xixurm@%(wb(omtuyh#_n4+%y_e8cy8j02*%x4-2hhtgc=t
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+SCHEDULER = 0
 
 ALLOWED_HOSTS = []
 
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_yasg',
+    'apscheduler',
 
     # local apps
     'authentication',
