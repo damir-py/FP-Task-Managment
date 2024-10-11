@@ -1,5 +1,4 @@
 from django.contrib.auth.hashers import check_password
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import UntypedToken
 
 from exceptions.CustomException import CustomException
@@ -17,13 +16,8 @@ def user_checking(data):
 
 
 def identify_role(token):
-    token = token.split()[1]
-    try:
-        # Verify and decode the token
+    if token:
+        token = token.split()[1]
+
         payload = UntypedToken(token)
         return payload.get('role', '')
-
-    except TokenError as e:
-        return e
-    except InvalidToken as e:
-        return e

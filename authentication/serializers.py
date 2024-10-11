@@ -1,14 +1,14 @@
-from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
+from rest_framework import serializers
 
 from exceptions.CustomException import CustomException
-from .models import User, Team
+from .models import User, Team, Task, Comment
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'phone_number', 'password', 'role', 'team', 'tasks')
+        fields = ('username', 'phone_number', 'password', 'role')
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -39,7 +39,32 @@ class TokenSerializer(serializers.Serializer):
 class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
-        fields = ['id', 'name', 'created_at', 'updated_at']  # Adjust the fields based on your Team model
+        fields = ('id', 'name', 'created_at', 'updated_at')
         extra_kwargs = {
             'name': {'required': True}
         }
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ('id', 'title', 'team', 'user', 'description', 'deadline', 'created_at')
+        extra_kwargs = {
+            'team': {'required': True}
+        }
+
+
+class TasksAddingSerializer(serializers.Serializer):
+    task_id = serializers.IntegerField()
+    users_id = serializers.ListField(child=serializers.IntegerField())
+
+
+class TeamAddingSerializer(serializers.Serializer):
+    team_id = serializers.IntegerField()
+    users_id = serializers.IntegerField()
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('id', 'text', 'user_id', 'task_id', 'created_at')
