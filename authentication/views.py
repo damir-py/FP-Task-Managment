@@ -1,3 +1,6 @@
+from datetime import date
+
+from django.db.models import Count, ExpressionWrapper, F, IntegerField, DateField, DurationField
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -188,3 +191,26 @@ def start_scheduler(request):
             settings.SCHEDULER = 1
         return Response(data={'result': data, 'ok': True}, status=status.HTTP_200_OK)
     raise CustomException('Scheduler already running!')
+
+
+class StatisticsAPIView(ViewSet):
+
+    def deadline(self, request):
+        current_time = date.today()
+
+        deadline = Task.objects.filter(deadline__gte=current_time).aggregate(Count('deadline'))
+
+        return Response({'data': deadline}, status=status.HTTP_200_OK)
+
+    def deadline_users(self, request):
+        current_time = date.today()
+        print(current_time)
+
+        users_ = User.objects.filter(role=2).annotate(deadlines=Count('task'),
+                                                      ending_time=ExpressionWrapper(
+                                                          F('task__deadline') - current_time,
+                                                          output_field=DurationField())).values('id', 'username',
+                                                                                               'task__title',
+                                                                                               'deadlines',
+                                                                                               'ending_time')
+        return Response({'data': users_}, status=status.HTTP_200_OK)

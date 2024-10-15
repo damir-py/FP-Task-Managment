@@ -31,7 +31,7 @@ def identify_role(token):
 
 def create_background_task():
     scheduler = BackgroundScheduler()
-    trigger = CronTrigger(day='last', hour=23, minute=58, timezone=settings.TIME_ZONE)
+    trigger = CronTrigger(hour=11, minute=0, timezone=settings.TIME_ZONE)
     scheduler.add_job(deadline_checking, trigger=trigger)
 
     return scheduler
